@@ -1,0 +1,70 @@
+<script>
+  const PageSpmSpider = {
+    template: `
+      <!-- Wadah utama dengan jarak antar elemen (space-y-6) -->
+      <div class="space-y-6">
+        
+        <!-- Kartu Sambutan / Informasi Halaman -->
+        <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm flex items-start space-x-3">
+          <div class="w-8 h-8 bg-gray-100 text-gray-700 rounded-lg flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900">SPM Spider</h3>
+            <p class="text-xs text-gray-600 mt-0.5">
+              {{ info }}
+            </p>
+            <div class="text-xs text-green-600 italic mt-0.5">
+              Sistem pemantauan status dan pelacakan proses Surat Perintah Membayar (SPM).
+            </div>
+          </div>
+        </div>
+
+        <!-- Container Konten Utama -->
+        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
+          
+          <!-- Card Info / Tautan Versi Lama -->
+          <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                ℹ️
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold text-blue-900">Informasi Laporan Interaktif</h4>
+                <p class="text-xs text-blue-700 mt-0.5">
+                  Laporan tracking dokumen SPM ini bersumber langsung dari Looker Studio secara *real-time*.
+                </p>
+              </div>
+            </div>
+            <a :href="urlLookerStudio" target="_blank" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 whitespace-nowrap shadow-sm">
+              <span>Buka Looker Studio</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+          </div>
+
+          <!-- Wrapper Iframe -->
+          <div class="relative w-full h-[700px] overflow-hidden rounded-lg border border-gray-200">
+            <iframe 
+              :src="urlLookerStudio" 
+              class="absolute top-0 left-0 w-full h-full border-0" 
+              allowfullscreen 
+              sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+            </iframe>
+          </div>
+          
+        </div>
+
+      </div>
+    `,
+    setup() {
+      const { ref } = Vue;
+      const info = ref('Monitoring dan pelacakan proses SPM secara real-time.');
+      const urlLookerStudio = ref('https://datastudio.google.com/embed/reporting/4f0fdbf6-2e4e-41cc-ba9c-af0d199bc93a/page/TlJ0C');
+      
+      return { 
+        info,
+        urlLookerStudio 
+      };
+    }
+  };
+</script>

@@ -1,0 +1,374 @@
+<script>
+  const PageBeranda = {
+    template: `
+      <!-- Wadah utama dengan jarak antar elemen (space-y-6) -->
+      <div class="space-y-6">
+        
+        <!-- Kartu Sambutan (Div Pertama) -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Selamat Datang di Dashboard SIPALA</h2>
+            <p class="text-gray-600">{{ info }}</p>
+          </div>
+          <!-- Tombol Tentang Aplikasi -->
+          <button @click="openModal" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-300 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm whitespace-nowrap">
+            <span>ℹ️</span>
+            <span>Tentang Aplikasi</span>
+          </button>
+        </div>
+
+        <!-- Card Info / Tautan Versi Lama -->
+        <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+              🚀
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold text-blue-900">Pembaruan Sistem SIPALA</h4>
+              <p class="text-xs text-blue-700 mt-0.5">
+                Dashboard SIPALA saat ini merupakan pengembangan lanjutan dari versi terdahulu. Anda tetap dapat mengakses portal versi lama melalui tautan berikut.
+              </p>
+            </div>
+          </div>
+          <a href="https://sites.google.com/view/sispala" target="_blank" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 whitespace-nowrap shadow-sm">
+            <span>Buka SIPALA Versi Lama</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          </a>
+        </div>
+
+        <!-- CARD MOODBOOSTER & TRACKER MOOD PEGAWAI -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
+          
+          <!-- Header & Moodbooster Utama Hari Ini -->
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+            <div>
+              <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                Suasana Hati Pegawai Hari Ini
+              </h3>
+              <p class="text-xs text-slate-500 mt-1">Ekspresikan perasaanmu hari ini secara anonim!</p>
+            </div>
+
+            <!-- Bagian Kanan: Moodbooster Utama & Tombol Refresh -->
+              <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                
+                <!-- Moodbooster Utama (Berdasarkan Akumulasi Terbanyak) -->
+                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2.5 rounded-xl flex items-center space-x-3 shadow-md shadow-blue-500/20 flex-1 md:flex-initial">
+                  <div class="text-2xl">{{ getMoodEmoji(moodData.dominantMood) }}</div>
+                  <div>
+                    <p class="text-[10px] uppercase font-bold tracking-wider text-blue-100">Moodbooster Utama</p>
+                    <p class="text-sm font-extrabold capitalize">{{ moodData.dominantMood }} ({{ moodData.percentages[moodData.dominantMood] || 0 }}%)</p>
+                  </div>
+                </div>
+
+                <!-- Tombol Refresh Besar (Tinggi disamakan & Berwarna Hijau) -->
+                <button 
+                  @click="fetchMoodData" 
+                  title="Muat ulang data terbaru"
+                  class="bg-white hover:bg-emerald-50 text-emerald-600 px-4 py-3.5 rounded-xl transition flex items-center justify-center border border-emerald-300 shadow-sm flex-shrink-0 self-stretch">
+                  <svg :class="{'animate-spin text-emerald-600': isChatLoading}" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+              </div>
+          </div>
+
+          <!-- FORM INPUT MOOD -->
+          <div class="bg-slate-50 p-5 rounded-xl border border-slate-200/60 space-y-4">
+            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Bagaimana Perasaanmu Hari Ini?</h4>
+            
+            <!-- Pilihan 5 Tombol Mood -->
+            <div class="grid grid-cols-5 gap-2 sm:gap-3">
+              <button 
+                v-for="item in moodOptions" 
+                :key="item.value"
+                @click="selectedMood = item.value"
+                :class="selectedMood === item.value ? 'bg-white border-2 border-blue-500 shadow-md scale-105' : 'bg-white border border-slate-200 hover:border-slate-300'"
+                class="p-3 rounded-xl flex flex-col items-center justify-center transition-all duration-200 group">
+                <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">{{ item.emoji }}</span>
+                <span class="text-[11px] font-semibold text-slate-600 mt-1 capitalize">{{ item.label }}</span>
+              </button>
+            </div>
+
+            <!-- Pesan Anonim & Tombol Kirim (Hanya muncul jika mood sudah dipilih) -->
+            <div v-if="selectedMood" class="space-y-4 pt-2 transition-all">
+              <div class="space-y-1.5">
+                <!-- Label Dinamis Berdasarkan Icon/Mood yang Dipilih -->
+                <label class="text-xs font-medium text-slate-700 flex items-center justify-between">
+                  <span>Kenapa Anda <strong class="text-blue-600 capitalize">{{ getSelectedLabel() }} {{ getMoodEmoji(selectedMood) }}</strong> hari ini? <span class="text-red-500">*Wajib min. 3 kata</span></span>
+                  <span :class="wordCount >= 3 ? 'text-emerald-600 font-bold' : 'text-amber-600'" class="text-[10px]">{{ wordCount }}/3 kata minimum</span>
+                </label>
+                <input 
+                  v-model="pesanAnonim" 
+                  type="text" 
+                  maxlength="150"
+                  placeholder="Tuliskan curhatan atau alasan singkat di sini..." 
+                  class="w-full text-xs px-3.5 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                />
+              </div>
+
+              <!-- Tombol Aksi (Kirim & Batal) -->
+              <div class="flex items-center space-x-2">
+                <!-- Tombol Kirim -->
+                <button 
+                  @click="submitUserMood" 
+                  :disabled="wordCount < 3 || isLoading"
+                  class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center space-x-2">
+                  <span v-if="isLoading">Menyimpan...</span>
+                  <span v-else>Kirim Perasaan Hari Ini 🚀</span>
+                </button>
+
+                <!-- Tombol Batal -->
+                <button 
+                  @click="cancelMoodSelection" 
+                  type="button"
+                  class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold transition border border-slate-200">
+                  Batal
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- REKAP PERSENTASE & AKUMULASI MOOD (Urutan Otomatis Tertinggi ke Terendah) -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">📊 Persentase & Statistik Mood Hari Ini</h4>
+              <span class="text-xs text-slate-500 font-medium">Total Responden: {{ moodData.totalVotes }} suara</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+              <!-- Menggunakan sortedMoodOptions agar otomatis urut dari persentase tertinggi -->
+              <div v-for="item in sortedMoodOptions" :key="item.value" class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col justify-between transition-all duration-300">
+                <div class="flex items-center justify-between">
+                  <span class="text-xl">{{ item.emoji }}</span>
+                  <span class="text-xs font-bold text-slate-700">{{ moodData.percentages[item.value] || 0 }}%</span>
+                </div>
+                <div class="mt-2">
+                  <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-full transition-all duration-500" :style="{ width: (moodData.percentages[item.value] || 0) + '%' }"></div>
+                  </div>
+                  <p class="text-[10px] text-slate-400 mt-1 text-right">{{ moodData.counts[item.value] || 0 }} Suara</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PESAN ANONIM HARI INI (Pojok Curhat & Pesan Tim) -->
+          <div class="pt-2">
+            <div class="flex justify-between items-center mb-2.5">
+              <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">💬 Pojok Curhat & Pesan Tim</h4>
+              <span class="text-[10px] text-slate-400 font-medium bg-slate-100 px-2 py-0.5 rounded-full">Anonim</span>
+            </div>
+            
+            <!-- Batasan tinggi max-h-60 dengan scroll vertikal dan efek loading -->
+            <div class="max-h-60 overflow-y-auto pr-1 space-y-2.5 relative">
+              
+              <!-- TAMPILAN LOADING SAAT MEMUAT DATA BARU -->
+              <div v-if="isChatLoading" class="py-10 flex flex-col items-center justify-center space-y-2 bg-slate-50 rounded-xl border border-slate-100">
+                <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-xs text-slate-500 font-medium">Memuat curhatan terbaru...</span>
+              </div>
+
+              <!-- DAFTAR PESAN -->
+              <template v-else-if="moodData.recentQuotes && moodData.recentQuotes.length > 0">
+                <div v-for="(quote, idx) in moodData.recentQuotes" :key="idx" class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5 transition-all">
+                  
+                  <!-- HEADER KARTU: Mood + Waktu -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-1.5">
+                      <span class="text-xs">{{ getMoodEmoji(quote.mood) }}</span>
+                      <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{{ quote.mood }}</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-medium bg-slate-200/60 px-1.5 py-0.5 rounded">{{ quote.time }}</span>
+                  </div>
+
+                  <!-- ISI CATATAN -->
+                  <p class="text-xs text-slate-700 italic">"{{ quote.text }}"</p>
+                </div>
+              </template>
+
+              <!-- KETIKA BELUM ADA DATA -->
+              <div v-else class="text-center py-8 text-slate-400 text-xs bg-slate-50 rounded-xl border border-slate-100">
+                Belum ada pesan anonim hari ini. Yuk jadi yang pertama!
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Popup Tentang Aplikasi -->
+        <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+            <!-- Header Modal -->
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                <span>💡</span> Tentang SIPALA
+              </h3>
+              <button @click="closeModal" class="text-gray-400 hover:text-gray-600 font-bold text-lg">✕</button>
+            </div>
+            
+            <!-- Konten Pesan -->
+            <div class="p-6 space-y-4 text-sm text-gray-600 leading-relaxed overflow-y-auto max-h-[75vh]">
+              <p>
+                <strong>SIPALA (Versi Baru)</strong> ini dibangun pada tahun 2026 oleh <strong>Tim TI BPS Kabupaten Aceh Barat Daya</strong> sebagai bentuk penyempurnaan dan pengembangan signifikan dari sistem versi sebelumnya.
+              </p>
+              <p>
+                Inovasi ini diharapkan mampu mengoptimalkan serta mendukung kelancaran tugas dan kinerja seluruh pegawai organik BPS Kabupaten Aceh Barat Daya.
+              </p>
+              
+              <div class="bg-blue-50/60 border border-blue-100 p-3.5 rounded-xl space-y-2 text-xs text-blue-900">
+                <p class="font-semibold text-blue-950">🛠️ Teknologi yang Digunakan:</p>
+                <ul class="list-disc list-inside space-y-1 text-blue-800">
+                  <li><strong>Backend:</strong> Google Apps Script</li>
+                  <li><strong>Frontend:</strong> Vue.js (Tailwind CSS)</li>
+                  <li><strong>Database:</strong> Google Spreadsheet</li>
+                </ul>
+              </div>
+
+              <p class="text-xs text-gray-500 italic pt-1">
+                Dashboard ini terbuka untuk dikembangkan lebih lanjut oleh siapa saja, dengan tetap memperhatikan izin dari pengembang utama, yaitu <strong>Al Munzir</strong> (<a href="mailto:almunzir2@gmail.com" class="text-blue-600 hover:underline font-medium">almunzir2@gmail.com</a>).
+              </p>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 flex justify-end">
+              <button @click="closeModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition shadow-sm">
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    `,
+    setup() {
+      const { ref, computed, onMounted } = Vue;
+      const info = ref('Sistem Informasi Pengelolaan Administrasi Lengkap Abdya.');
+      const isModalOpen = ref(false);
+
+      const selectedMood = ref('');
+      const pesanAnonim = ref('');
+      const isLoading = ref(false);
+      const isChatLoading = ref(false);
+
+      const moodOptions = [
+        { value: 'semangat', label: 'Semangat', emoji: '🔥' },
+        { value: 'senang', label: 'Senang', emoji: '😊' },
+        { value: 'biasa', label: 'Biasa Aja', emoji: '😐' },
+        { value: 'sedih', label: 'Sedih', emoji: '😢' },
+        { value: 'gakmood', label: 'Gak Mood', emoji: '😡' }
+      ];
+
+      const moodData = ref({
+        totalVotes: 0,
+        counts: { semangat: 0, senang: 0, biasa: 0, sedih: 0, gakmood: 0 },
+        percentages: { semangat: 0, senang: 0, biasa: 0, sedih: 0, gakmood: 0 },
+        dominantMood: 'semangat',
+        recentQuotes: []
+      });
+
+      const getMoodEmoji = (mood) => {
+        const map = { semangat: '🔥', senang: '😊', biasa: '😐', sedih: '😢', gakmood: '😡' };
+        return map[mood] || '✨';
+      };
+
+      // Mengambil teks label mood yang sedang dipilih
+      const getSelectedLabel = () => {
+        const found = moodOptions.find(item => item.value === selectedMood.value);
+        return found ? found.label.toLowerCase() : '';
+      };
+
+      // Computed untuk menghitung jumlah kata secara real-time pada input curhat
+      const wordCount = computed(() => {
+        if (!pesanAnonim.value.trim()) return 0;
+        return pesanAnonim.value.trim().split(/\s+/).length;
+      });
+
+      const fetchMoodData = () => {
+        isChatLoading.value = true; // Nyalakan loading saat mulai ambil data
+        google.script.run
+          .withSuccessHandler((res) => {
+            isChatLoading.value = false; // Matikan loading saat data sukses diterima
+            if (res.status) {
+              moodData.value = res;
+            }
+          })
+          .withFailureHandler((err) => {
+            isChatLoading.value = false;
+            console.error(err);
+          })
+          .getDailyMoodSummary();
+      };
+
+      const submitUserMood = () => {
+        if (!selectedMood.value || wordCount.value < 3) return;
+
+        isLoading.value = true;
+        google.script.run
+          .withSuccessHandler((res) => {
+            isLoading.value = false;
+            if (res.status) {
+              // Reset form
+              selectedMood.value = '';
+              pesanAnonim.value = '';
+              
+              // Muat ulang data terbaru (otomatis menampilkan loading di pojok curhat)
+              fetchMoodData();
+            } else {
+              alert(res.message);
+            }
+          })
+          .withFailureHandler((err) => {
+            isLoading.value = false;
+            alert("Gagal terhubung: " + err.message);
+          })
+          .submitMood(selectedMood.value, pesanAnonim.value);
+      };
+
+      const openModal = () => {
+        isModalOpen.value = true;
+      };
+
+      const closeModal = () => {
+        isModalOpen.value = false;
+      };
+
+      onMounted(() => {
+        fetchMoodData();
+      });
+
+      const cancelMoodSelection = () => {
+        selectedMood.value = '';
+        pesanAnonim.value = '';
+      };
+
+      // Computed untuk mengurutkan pilihan mood dari persentase tertinggi ke terendah secara dinamis
+      const sortedMoodOptions = computed(() => {
+        return [...moodOptions].sort((a, b) => {
+          const percentA = moodData.value.percentages[a.value] || 0;
+          const percentB = moodData.value.percentages[b.value] || 0;
+          // Urutkan dari besar ke kecil (descending)
+          return percentB - percentA;
+        });
+      });
+      
+      return { 
+        info,
+        isModalOpen,
+        isChatLoading,
+        fetchMoodData,
+        openModal,
+        closeModal,
+        selectedMood,
+        pesanAnonim,
+        isLoading,
+        moodOptions,
+        moodData,
+        getMoodEmoji,
+        getSelectedLabel,
+        wordCount,
+        submitUserMood,
+        cancelMoodSelection,
+        sortedMoodOptions
+      };
+    }
+  };
+</script>

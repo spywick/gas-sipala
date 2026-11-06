@@ -1,0 +1,469 @@
+<script>
+  const PageDokumentasi = {
+    template: `
+      <div class="space-y-6">
+
+        <!-- Header & Action Button -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <span class="text-gray-600 flex items-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </span>
+              Dokumentasi
+            </h1>
+            <p class="text-gray-600 text-sm">Kelola daftar arsip dokumentasi, tautan, dan laporan kegiatan.</p>
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            <button @click="fetchData" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-1 shadow-sm" title="Refresh Data">
+              <span>🔄</span>
+            </button>
+            <button @click="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+              <span>Tambah Dokumentasi</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Info / Tautan Versi Lama -->
+        <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+              ℹ️
+            </div>
+            <div>
+              <h4 class="text-sm font-semibold text-blue-900">Arsip Dokumentasi Tahun 2025 & 2026</h4>
+              <p class="text-xs text-blue-700 mt-0.5">
+                Dokumentasi untuk tahun tersebut dapat diakses melalui portal SIPALA versi terdahulu.
+              </p>
+            </div>
+          </div>
+          <a href="https://sites.google.com/view/sispala/Foto/foto-2025" target="_blank" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 whitespace-nowrap shadow-sm">
+            <span>Buka SIPALA Versi Lama</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          </a>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between gap-4">
+          <div class="w-full md:w-1/3">
+            <input type="text" v-model="searchQuery" placeholder="Cari deskripsi, tags, atau keterangan..." 
+                   class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="flex gap-2 w-full md:w-1/2">
+            <select v-model="selectedBulan" class="w-1/2 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Semua Bulan</option>
+              <option v-for="b in daftarBulan" :key="b" :value="b">{{ b }}</option>
+            </select>
+            <select v-model="selectedTahun" class="w-1/2 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Semua Tahun</option>
+              <option v-for="thn in uniqueTahun" :key="thn" :value="thn">{{ thn }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Kartu Utama Tabel (Berisi Control Top, Tabel, & Pagination di dalam border) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+         
+          <!-- Kontrol Bar Atas di dalam Card -->
+          <div class="p-6 pb-4 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600 gap-2 border-b border-gray-100">
+            <div class="flex items-center space-x-2">
+              <span>Tampilkan</span>
+              <select v-model.number="itemsPerPage" @change="currentPage = 1" class="border border-gray-200 rounded-lg px-2.5 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option :value="5">5</option>
+                <option :value="10">10</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+              </select>
+              <span>data per halaman</span>
+            </div>
+            <div>
+              <span v-if="filteredData.length > 0">Menampilkan {{ startIndex + 1 }} - {{ endIndex }} dari {{ filteredData.length }} data</span>
+              <span v-else>Menampilkan 0 data</span>
+            </div>
+          </div>
+          
+          <!-- Tabel Data -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider border-b border-gray-200">
+                  <th class="py-3 px-4 font-semibold w-12 text-center">No</th>
+                  <th class="py-3 px-4 font-semibold cursor-pointer" @click="sortBy('tahun')">
+                    Tanggal <span>{{ sortField === 'tahun' ? (sortAsc ? '▲' : '▼') : '' }}</span>
+                  </th>
+                  <th class="py-3 px-4 font-semibold">Deskripsi</th>
+                  <th class="py-3 px-4 font-semibold">Link</th>
+                  <th class="py-3 px-4 font-semibold">Tags</th>
+                  <th class="py-3 px-4 font-semibold">Keterangan</th>
+                  <th class="py-3 px-4 font-semibold text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 text-sm text-gray-600">
+                <tr v-if="loading">
+                  <td colspan="7" class="py-8 text-center text-gray-400">Memuat data dari Google Sheets...</td>
+                </tr>
+                <tr v-else-if="paginatedData.length === 0">
+                  <td colspan="7" class="py-8 text-center text-gray-400">Tidak ada data dokumentasi yang ditemukan.</td>
+                </tr>
+                <tr v-for="(item, index) in paginatedData" :key="item.rowIndex" class="hover:bg-gray-50 transition">
+                  <td class="py-3 px-4 text-center font-medium text-gray-500">{{ startIndex + index + 1 }}</td>
+                  <td class="py-3 px-4 whitespace-nowrap font-medium text-gray-800">
+                    <span class="bg-gray-100 px-2.5 py-1 rounded text-xs font-semibold">
+                      {{ item.tanggal }} {{ item.bulan }} {{ item.tahun }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-800">{{ item.deskripsi }}</td>
+                  <td class="py-3 px-4 italic">
+                    <a :href="item.link_dokumentasi" target="_blank" class="text-blue-600 hover:underline truncate max-w-xs block">
+                      📂 Buka Link
+                    </a>
+                  </td>
+                  <td class="py-3 px-4">
+                    <span v-if="item.tags" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-medium">
+                      {{ item.tags }}
+                    </span>
+                    <span v-else class="text-gray-400 text-xs">-</span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-500 italic">{{ item.keterangan || '-' }}</td>
+                  <td class="py-3 px-4 text-center space-x-2 whitespace-nowrap">
+                    <button @click="openModal(item)" class="text-amber-600 hover:text-amber-800 font-medium text-xs bg-amber-50 px-2.5 py-1 rounded transition">Edit</button>
+                    <button @click="deleteData(item.rowIndex)" class="text-red-600 hover:text-red-800 font-medium text-xs bg-red-50 px-2.5 py-1 rounded transition">Hapus</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar Bawah -->
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between text-sm text-gray-600 gap-4">
+            <div>
+              Halaman {{ currentPage }} dari {{ totalPages || 1 }}
+            </div>
+            <div class="flex items-center space-x-1">
+              <!-- Tombol Previous -->
+              <button @click="currentPage--" :disabled="currentPage === 1" 
+                      class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition">
+                ‹
+              </button>
+              
+              <!-- Daftar Nomor Halaman (Maksimal 5 dengan ellipsis ...) -->
+              <template v-for="(page, idx) in visiblePages">
+                <button v-if="page !== '...'" :key="'page-' + idx" @click="currentPage = page"
+                        :class="['w-8 h-8 flex items-center justify-center border rounded-lg text-sm font-medium transition', currentPage === page ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100']">
+                  {{ page }}
+                </button>
+                <span v-else :key="'dot-' + idx" class="w-8 h-8 flex items-center justify-center text-gray-400 font-medium">
+                  ...
+                </span>
+              </template>
+
+              <!-- Tombol Next -->
+              <button @click="currentPage++" :disabled="currentPage >= totalPages" 
+                      class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 transition">
+                ›
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Form Tambah / Edit -->
+        <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 class="font-bold text-gray-800">{{ form.rowIndex ? 'Edit Dokumentasi' : 'Tambah Dokumentasi Baru' }}</h3>
+              <button @click="closeModal" class="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <form @submit.prevent="saveData" class="p-6 space-y-4">
+              <!-- Tanggal, Bulan, Tahun -->
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Tanggal <span class="text-red-500">*</span></label>
+                  <select v-model="form.tanggal" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option v-for="t in 31" :key="t" :value="t">{{ t }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Bulan <span class="text-red-500">*</span></label>
+                  <select v-model="form.bulan" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option v-for="b in daftarBulan" :key="b" :value="b">{{ b }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Tahun <span class="text-red-500">*</span></label>
+                  <input type="number" v-model="form.tahun" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="2026">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Deskripsi <span class="text-red-500">*</span></label>
+                <textarea v-model="form.deskripsi" rows="2" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Rincian atau judul dokumentasi..."></textarea>
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Link Dokumentasi <span class="text-red-500">*</span></label>
+                <input type="url" v-model="form.link_dokumentasi" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Tags <span class="text-gray-400">(Opsional)</span></label>
+                <input type="text" v-model="form.tags" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Misal: Laporan, Kegiatan, Foto">
+              </div>
+
+              <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Keterangan <span class="text-gray-400">(Opsional)</span></label>
+                <textarea v-model="form.keterangan" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+              </div>
+
+              <div class="flex justify-end space-x-2 pt-2">
+                <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition">Batal</button>
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50">
+                  {{ saving ? 'Menyimpan...' : 'Simpan' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    `,
+    setup() {
+      const { ref, computed, onMounted, watch } = Vue;
+      
+      const daftarBulanMap = {
+        'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5, 'Juni': 6,
+        'Juli': 7, 'Agustus': 8, 'September': 9, 'Oktober': 10, 'November': 11, 'Desember': 12
+      };
+
+      const tableData = ref([]);
+      const loading = ref(true);
+      const saving = ref(false);
+      
+      const searchQuery = ref('');
+      const selectedBulan = ref('');
+      const selectedTahun = ref('');
+      const sortField = ref('tahun');
+      const sortAsc = ref(false);
+      
+      const currentPage = ref(1);
+      const itemsPerPage = ref(10); // Default 10 data per halaman
+      
+      const isModalOpen = ref(false);
+      const daftarBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+      const form = ref({
+        rowIndex: '',
+        tanggal: new Date().getDate(),
+        bulan: daftarBulan[new Date().getMonth()],
+        tahun: new Date().getFullYear(),
+        deskripsi: '',
+        link_dokumentasi: '',
+        tags: '',
+        keterangan: ''
+      });
+
+      const fetchData = () => {
+        loading.value = true;
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res.status) {
+              tableData.value = res.data;
+            } else {
+              alert(res.message);
+            }
+            loading.value = false;
+          })
+          .withFailureHandler(err => {
+            alert("Gagal memuat data: " + err.message);
+            loading.value = false;
+          })
+          .getDokumentasiData();
+      };
+
+      onMounted(() => {
+        fetchData();
+      });
+
+      const uniqueTahun = computed(() => {
+        const tahuns = tableData.value.map(item => item.tahun).filter(Boolean);
+        return [...new Set(tahuns)].sort((a, b) => b - a);
+      });
+
+      const filteredData = computed(() => {
+        return tableData.value.filter(item => {
+          const matchSearch = (item.deskripsi || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                              (item.tags || '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                              (item.keterangan || '').toLowerCase().includes(searchQuery.value.toLowerCase());
+          const matchBulan = selectedBulan.value === '' || item.bulan === selectedBulan.value;
+          const matchTahun = selectedTahun.value === '' || String(item.tahun) === String(selectedTahun.value);
+          return matchSearch && matchBulan && matchTahun;
+        }).sort((a, b) => {
+          let modifier = sortAsc.value ? 1 : -1;
+          
+          if (sortField.value === 'tahun') {
+            // Urutkan berdasarkan Tahun -> Bulan -> Tanggal secara komprehensif
+            let thnDiff = (Number(b.tahun) - Number(a.tahun)) * -modifier;
+            if (thnDiff !== 0) return thnDiff;
+
+            let blnDiff = (daftarBulanMap[b.bulan] - daftarBulanMap[a.bulan]) * -modifier;
+            if (blnDiff !== 0) return blnDiff;
+
+            return (Number(b.tanggal) - Number(a.tanggal)) * -modifier;
+          } else {
+            let valA = a[sortField.value];
+            let valB = b[sortField.value];
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+            if (valA < valB) return -1 * modifier;
+            if (valA > valB) return 1 * modifier;
+            return 0;
+          }
+        });
+      });
+
+      // Reset ke halaman 1 jika filter atau pencarian berubah
+      watch([searchQuery, selectedBulan, selectedTahun], () => {
+        currentPage.value = 1;
+      });
+
+      const totalPages = computed(() => {
+        return Math.ceil(filteredData.value.length / itemsPerPage.value) || 1;
+      });
+
+      const startIndex = computed(() => {
+        return (currentPage.value - 1) * itemsPerPage.value;
+      });
+
+      const endIndex = computed(() => {
+        const end = startIndex.value + itemsPerPage.value;
+        return end > filteredData.value.length ? filteredData.value.length : end;
+      });
+
+      const paginatedData = computed(() => {
+        return filteredData.value.slice(startIndex.value, endIndex.value);
+      });
+
+      const sortBy = (field) => {
+        if (sortField.value === field) {
+          sortAsc.value = !sortAsc.value;
+        } else {
+          sortField.value = field;
+          sortAsc.value = true;
+        }
+      };
+
+      const openModal = (item = null) => {
+        if (item) {
+          form.value = { ...item };
+        } else {
+          form.value = {
+            rowIndex: '',
+            tanggal: new Date().getDate(),
+            bulan: daftarBulan[new Date().getMonth()],
+            tahun: new Date().getFullYear(),
+            deskripsi: '',
+            link_dokumentasi: '',
+            tags: '',
+            keterangan: ''
+          };
+        }
+        isModalOpen.value = true;
+      };
+
+      const closeModal = () => {
+        isModalOpen.value = false;
+      };
+
+      const saveData = () => {
+        saving.value = true;
+        google.script.run
+          .withSuccessHandler(res => {
+            saving.value = false;
+            if (res.status) {
+              alert(res.message);
+              closeModal();
+              fetchData();
+            } else {
+              alert(res.message);
+            }
+          })
+          .withFailureHandler(err => {
+            saving.value = false;
+            alert("Terjadi kesalahan: " + err.message);
+          })
+          .saveDokumentasi(form.value);
+      };
+
+      const deleteData = (rowIndex) => {
+        if (confirm("Apakah Anda yakin ingin menghapus data dokumentasi ini?")) {
+          google.script.run
+            .withSuccessHandler(res => {
+              if (res.status) {
+                alert(res.message);
+                fetchData();
+              } else {
+                alert(res.message);
+              }
+            })
+            .withFailureHandler(err => {
+              alert("Gagal menghapus: " + err.message);
+            })
+            .deleteDokumentasi(rowIndex);
+        }
+      };
+
+      const visiblePages = computed(() => {
+        let pages = [];
+        let total = totalPages.value;
+        let current = currentPage.value;
+        
+        if (total <= 5) {
+          for (let i = 1; i <= total; i++) pages.push(i);
+        } else {
+          if (current <= 3) {
+            pages = [1, 2, 3, 4, '...', total];
+          } else if (current >= total - 2) {
+            pages = [1, '...', total - 3, total - 2, total - 1, total];
+          } else {
+            pages = [1, '...', current - 1, current, current + 1, '...', total];
+          }
+        }
+        return pages;
+      });
+
+      return {
+        tableData,
+        loading,
+        saving,
+        searchQuery,
+        selectedBulan,
+        selectedTahun,
+        daftarBulan,
+        uniqueTahun,
+        sortField,
+        sortAsc,
+        currentPage,
+        itemsPerPage,
+        totalPages,
+        startIndex,
+        endIndex,
+        paginatedData,
+        sortBy,
+        isModalOpen,
+        form,
+        openModal,
+        closeModal,
+        saveData,
+        deleteData,
+        fetchData,
+        filteredData,
+        visiblePages,
+      };
+    }
+  };
+</script>

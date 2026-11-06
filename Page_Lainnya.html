@@ -1,0 +1,234 @@
+<script>
+  const PageLainnya = {
+    template: `
+      <!-- Wadah utama dengan jarak antar elemen (space-y-6) -->
+      <div class="space-y-6">
+        
+        <!-- Kartu Informasi / Sambutan Halaman -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">Menu Lainnya</h2>
+          <p class="text-gray-600 text-sm mb-4">{{ info }}</p>
+          <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg text-blue-700 text-sm">
+            Halaman ini menampung berbagai modul, informasi pendukung, dan utilitas tambahan lainnya.
+          </div>
+        </div>
+
+        <!-- Panel Modul Tambahan -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Modul & Layanan Pendukung</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            <!-- Card SILIPSTIK -->
+            <button @click="openDriveModal('SILIPSTIK (Sharing Informasi Seputar Statistik)', '1bt78Fd6BTnLs_YGg8oxJGXKDNEd47aTM')" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-blue-50/50 hover:border-blue-200 transition-all flex items-center space-x-3 group">
+              <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                📊
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">SILIPSTIK</h4>
+                <p class="text-xs text-slate-400">Sharing Informasi Seputar Statistik</p>
+              </div>
+            </button>
+
+            <!-- Card Arsip Dokumen Lainnya -->
+            <button @click="openDriveModal('Arsip Dokumen Lainnya', '1I0187irhtK6iMabg2klRsnlwuMuAPKhx')" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-emerald-50/50 hover:border-emerald-200 transition-all flex items-center space-x-3 group">
+              <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                🗂️
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Arsip Dokumen Lainnya</h4>
+                <p class="text-xs text-slate-400">Kumpulan Arsip & Dokumen Pendukung</p>
+              </div>
+            </button>
+
+            <!-- Card Arsip Dokumen SOP -->
+            <button @click="openDriveModal('Arsip Dokumen SOP', '1PFYU1o5HM5bcQqV6V6g9Z887lwxi3A5c')" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-amber-50/50 hover:border-amber-200 transition-all flex items-center space-x-3 group">
+              <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                📋
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 group-hover:text-amber-600 transition-colors">Arsip Dokumen SOP</h4>
+                <p class="text-xs text-slate-400">Standar Operasional Prosedur</p>
+              </div>
+            </button>
+
+            <!-- Card Saleum Teuka -->
+            <button @click="openDriveModal('Saleum Teuka (Salam, Sapa dan Literasi Statistik)', '1E4zcP7oyDqo1KsJH2mQPISuUKqHqzmpn')" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-rose-50/50 hover:border-rose-200 transition-all flex items-center space-x-3 group">
+              <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                ☕
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 group-hover:text-rose-600 transition-colors">Saleum Teuka</h4>
+                <p class="text-xs text-slate-400">Salam, Sapa dan Literasi Statistik</p>
+              </div>
+            </button>
+
+             <!-- Card SI-MPOK -->
+            <a :href="urlSimpok" target="_blank" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-purple-50/50 hover:border-purple-200 transition-all flex items-center justify-between group">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  📈
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-slate-800 group-hover:text-purple-600 transition-colors">SI-MPOK</h4>
+                  <p class="text-xs text-slate-400">Sistem Manajemen Pengumpulan Output Kinerja</p>
+                </div>
+              </div>
+              <span class="text-xs text-slate-400 group-hover:text-purple-600">↗</span>
+            </a>
+
+            <!-- Card Absen Rapat -->
+            <a :href="urlAbsenRapat" target="_blank" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-teal-50/50 hover:border-teal-200 transition-all flex items-center justify-between group">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                  📝
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-slate-800 group-hover:text-teal-600 transition-colors">Absen Rapat</h4>
+                  <p class="text-xs text-slate-400">Arsip Absensi Rapat</p>
+                </div>
+              </div>
+              <span class="text-xs text-slate-400 group-hover:text-teal-600">↗</span>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- Panel Kegiatan Sensus -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Kegiatan Sensus</h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            <!-- Card ST-2023 -->
+            <button @click="openDriveModal('ST-2023 (Sensus Pertanian 2023)', '1ehXsAfnsek6DOk8sEtgqTvZGgiQP1i-X')" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-green-50/50 hover:border-green-200 transition-all flex items-center space-x-3 group">
+              <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                🌾
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 group-hover:text-green-600 transition-colors">ST-2023</h4>
+                <p class="text-xs text-slate-400">Sensus Pertanian 2023</p>
+              </div>
+            </button>
+
+            <!-- Card PL-KUMKM -->
+            <button @click="openDriveModal('PL-KUMKM (Pendataan Lengkap KUMKM)', '1YmF8V_fCeAlwA8k6JloavmJEL6YNXXZQ')" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-cyan-50/50 hover:border-cyan-200 transition-all flex items-center space-x-3 group">
+              <div class="w-10 h-10 bg-cyan-100 text-cyan-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                🏢
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 group-hover:text-cyan-600 transition-colors">PL-KUMKM</h4>
+                <p class="text-xs text-slate-400">Pendataan Lengkap KUMKM</p>
+              </div>
+            </button>
+
+            <!-- Card SE2026 -->
+            <button @click="openDriveModal('SE2026 (Sensus Ekonomi 2026)', '1cnwxc1q8MKesq3D2jPL50vNBNatQSn9a')" class="w-full text-left p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-orange-50/50 hover:border-orange-200 transition-all flex items-center space-x-3 group">
+              <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                📊
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-800 group-hover:text-orange-600 transition-colors">SE2026</h4>
+                <p class="text-xs text-slate-400">Sensus Ekonomi 2026</p>
+              </div>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Modal Popup Iframe Google Drive -->
+        <div v-if="isModalOpen" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col h-[85vh]">
+            
+            <!-- Header Modal -->
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 flex-shrink-0">
+              <h3 class="font-bold text-gray-800 flex items-center gap-2 text-base">
+                <span>📁</span> {{ modalTitle }}
+              </h3>
+              <button @click="closeModal" class="text-gray-400 hover:text-gray-600 font-bold text-lg px-2">✕</button>
+            </div>
+            
+            <!-- Konten Iframe dengan Animasi Loading -->
+            <div class="relative w-full flex-1 bg-gray-50 overflow-hidden">
+              
+              <!-- Indikator Loading Spinner & Pesan -->
+              <div v-if="isLoading" class="absolute inset-0 bg-white/90 backdrop-blur-xs flex flex-col items-center justify-center z-20 space-y-3">
+                <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <p class="text-sm font-medium text-gray-700">Sedang memuat Google Drive...</p>
+                <p class="text-xs text-gray-400">Harap tunggu sebentar</p>
+              </div>
+
+              <!-- Iframe Google Drive -->
+              <iframe 
+                :key="iframeKey"
+                :src="currentEmbedUrl" 
+                @load="onIframeLoaded"
+                class="w-full h-full border-0" 
+                allowfullscreen>
+              </iframe>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="px-6 py-3 border-t border-gray-100 bg-gray-50 flex justify-between items-center flex-shrink-0">
+              <a :href="currentWebUrl" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                <span>Buka folder di Tab Baru</span>
+                <span>↗</span>
+              </a>
+              <button @click="closeModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition shadow-sm">
+                Tutup
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    `,
+    setup() {
+      const { ref } = Vue;
+      const info = ref('Pusat utilitas, informasi tambahan, dan modul penunjang produktivitas SIPALA.');
+
+      const isModalOpen = ref(false);
+      const modalTitle = ref('');
+      const currentEmbedUrl = ref('');
+      const currentWebUrl = ref('');
+      const iframeKey = ref(0);
+      const isLoading = ref(true);
+      const urlSimpok = ref('https://sites.google.com/view/si-mpok/home');
+      const urlAbsenRapat = ref('https://sites.google.com/view/absen-rapat');
+
+      const openDriveModal = (title, folderId) => {
+        modalTitle.value = title;
+        currentEmbedUrl.value = `https://drive.google.com/embeddedfolderview?id=${folderId}#list`;
+        currentWebUrl.value = `https://drive.google.com/drive/folders/${folderId}`;
+        
+        isLoading.value = true;
+        iframeKey.value += 1;
+        isModalOpen.value = true;
+      };
+
+      const closeModal = () => {
+        isModalOpen.value = false;
+      };
+
+      const onIframeLoaded = () => {
+        isLoading.value = false;
+      };
+
+      return { 
+        info,
+        isModalOpen,
+        modalTitle,
+        currentEmbedUrl,
+        currentWebUrl,
+        iframeKey,
+        isLoading,
+        openDriveModal,
+        closeModal,
+        onIframeLoaded,
+        urlSimpok,
+        urlAbsenRapat
+      };
+    }
+  };
+</script>

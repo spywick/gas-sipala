@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard SIPALA</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Vue.js 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <div id="app" class="flex min-h-screen w-full overflow-x-hidden">
+    
+    <!-- Sidebar -->
+    <?!= include('Sidebar'); ?>
+
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-y-auto min-w-0 w-full">
+      
+      <!-- Top Header (Sticky di atas saat discroll) -->
+      <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center border-b border-gray-200 sticky top-0 z-40 flex-shrink-0">
+        <div class="flex items-center space-x-4">
+          <!-- Tombol Toggle Sidebar untuk Mobile -->
+          <button @click="toggleSidebar" class="md:hidden text-gray-600 hover:text-gray-800 focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+
+          <!-- Judul Halaman / Breadcrumb aktif -->
+          <h1 class="text-lg font-semibold text-gray-700 capitalize">
+            {{ currentMenu.replace('_', ' ') }}
+          </h1>
+        </div>
+
+        <!-- Jam Digital & Tanggal Real-time -->
+        <div class="hidden md:flex text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 shadow-inner items-center space-x-1.5">
+          <span>🕒</span>
+          <span>{{ currentTime }}</span>
+        </div>
+      </header>
+
+      <!-- Wrapper untuk Main Content & Footer agar terdorong ke bawah -->
+      <div class="flex-1 flex flex-col justify-between w-full">
+        
+        <!-- Main Content Area -->
+        <main class="p-4 sm:p-6 w-full">
+          <keep-alive>
+            <component :is="'page-' + currentMenu"></component>
+          </keep-alive>
+        </main>
+
+        <!-- Footer Dashboard -->
+        <footer class="bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-500 flex-shrink-0">
+          <span title="Al Munzir (almunzir2@gmail.com)">
+            Copyright &copy; 2026 - {{ currentYear }} Dashboard SIPALA. All rights reserved.
+          </span>
+        </footer>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Memuat Definisi Komponen dari File Terpisah -->
+  <?!= include('Page_Beranda'); ?>
+  <?!= include('Page_Anggaran'); ?>
+  <?!= include('Page_Nomor_Surat'); ?>
+  <?!= include('Page_Spm_Spider'); ?>
+  <?!= include('Page_Dokumentasi'); ?>
+  <?!= include('Page_Arsip_Link'); ?>
+  <?!= include('Page_Monitoring_Kegiatan'); ?>
+  <?!= include('Page_Monitoring_Kinerja'); ?>
+  <?!= include('Page_Rakan_Mitra'); ?>
+  <?!= include('Page_Lainnya'); ?>
+
+  <!-- Inisialisasi Vue.js Utama -->
+  <script>
+    const { createApp, ref, onMounted, onUnmounted, watch } = Vue;
+
+    const app = createApp({
+      setup() {
+        const currentMenu = ref('beranda');
+        const currentTime = ref('');
+        const isSidebarOpen = ref(false);
+        const isAdministrasiOpen = ref(false);
+        const currentYear = ref(new Date().getFullYear()); // Mengambil tahun berjalan secara otomatis
+        let timer = null;
+
+        // Fungsi buka/tutup sidebar mobile
+        const toggleSidebar = () => {
+          isSidebarOpen.value = !isSidebarOpen.value;
+        };
+
+        // Fungsi otomatis menutup sidebar di HP saat menu diklik
+        const toggleMobileSidebar = () => {
+          if (window.innerWidth < 768) {
+            isSidebarOpen.value = false;
+          }
+        };
+
+        // Otomatis buka dropdown Administrasi jika submenu-nya aktif
+        watch(currentMenu, (newVal) => {
+          if (['nomor_surat', 'spm_spider'].includes(newVal)) {
+            isAdministrasiOpen.value = true;
+          }
+        });
+
+        // Fungsi jam & tanggal real-time
+        const updateClock = () => {
+          const now = new Date();
+          const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+          };
+          currentTime.value = now.toLocaleDateString('id-ID', options) + ' WIB';
+        };
+
+        onMounted(() => {
+          updateClock();
+          timer = setInterval(updateClock, 1000);
+        });
+
+        onUnmounted(() => {
+          clearInterval(timer);
+        });
+
+        return {
+          currentMenu,
+          currentTime,
+          isSidebarOpen,
+          isAdministrasiOpen,
+          currentYear,
+          toggleSidebar,
+          toggleMobileSidebar
+        };
+      }
+    });
+
+    // Mendaftarkan komponen halaman ke instance Vue
+    app.component('page-beranda', PageBeranda);
+    app.component('page-anggaran', PageAnggaran);
+    app.component('page-nomor_surat', PageNomorSurat);
+    app.component('page-spm_spider', PageSpmSpider);
+    app.component('page-dokumentasi', PageDokumentasi);
+    app.component('page-arsip_link', PageArsipLink);
+    app.component('page-monitoring_kegiatan', PageMonitoringKegiatan);
+    app.component('page-monitoring_kinerja', PageMonitoringKinerja);
+    app.component('page-rakan_mitra', PageRakanMitra);
+    app.component('page-lainnya', PageLainnya);
+
+    app.mount('#app');
+  </script>
+
+</body>
+</html>
