@@ -126,7 +126,8 @@
               <label class="block text-xs font-medium text-slate-500 mb-1">Filter Status Bayar</label>
               <select v-model="selectedStatus" class="w-full py-2 px-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-500">
                 <option value="ALL">Semua Status</option>
-                <option v-for="st in statusOptions" :key="st" :value="st">{{ st }}</option>
+                <option value="true">Sudah Dibayar</option>
+                <option value="false">Belum Dibayar</option>
               </select>
             </div>
 
@@ -189,7 +190,7 @@
                   <td class="py-3 px-4 text-right font-bold text-slate-900">{{ formatRupiah(item.jumlahNetto) }}</td>
                   <td class="py-3 px-4 text-center">
                     <span :class="['px-2.5 py-1 rounded-lg text-xs font-semibold', getStatusClass(item.sudahBayar)]">
-                      {{ item.sudahBayar }}
+                      {{ item.sudahBayar ? 'Sudah Dibayar' : 'Belum Dibayar' }}
                     </span>
                   </td>
                   <td class="py-3 px-4 text-center whitespace-nowrap">
@@ -257,7 +258,7 @@
                 <div class="bg-slate-50 p-3 rounded-xl"><span class="text-xs text-slate-400 block">KRO / Sub Output</span><strong class="text-slate-800">{{ selectedItem.kro }} / {{ selectedItem.subOutput }}</strong></div>
                 <div class="bg-slate-50 p-3 rounded-xl"><span class="text-xs text-slate-400 block">Akun / Komponen / Detail</span><strong class="text-slate-800">{{ selectedItem.akun }} / {{ selectedItem.komponen }} / {{ selectedItem.detail }}</strong></div>
                 <div class="bg-slate-50 p-3 rounded-xl"><span class="text-xs text-slate-400 block">NPWP Penerima</span><strong class="text-slate-800">{{ selectedItem.npwp }}</strong></div>
-                <div class="bg-slate-50 p-3 rounded-xl"><span class="text-xs text-slate-400 block">Sudah Bayar</span><strong class="text-slate-800">{{ selectedItem.sudahBayar }}</strong></div>
+                <div class="bg-slate-50 p-3 rounded-xl"><span class="text-xs text-slate-400 block">Sudah Bayar</span><strong class="text-slate-800">{{ selectedItem.sudahBayar ? 'Sudah Dibayar' : 'Belum Dibayar' }}</strong></div>
               </div>
 
               <div class="bg-slate-50 p-3 rounded-xl">
@@ -439,6 +440,12 @@
         return Math.ceil(filteredData.value.length / itemsPerPage.value) || 1;
       });
 
+
+      // Jika jumlah halaman menyusut (hapus/sinkron/filter), jangan biarkan halaman aktif melewati batas
+      watch(totalPages, (n) => {
+        if (currentPage.value > n) currentPage.value = n;
+      });
+
       const startIndex = computed(() => {
         return (currentPage.value - 1) * itemsPerPage.value;
       });
@@ -476,14 +483,11 @@
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number || 0);
       };
 
+      // status = boolean dari server (true = sudah dibayar)
       const getStatusClass = (status) => {
-        const stLower = String(status).toLowerCase();
-        if (stLower.includes('true') || stLower.includes('1') || stLower.includes('lunas')) {
-          return 'bg-emerald-50 text-emerald-600 border border-emerald-200';
-        } else if (stLower.includes('false') || stLower.includes('0')) {
-          return 'bg-rose-50 text-rose-600 border border-rose-200';
-        }
-        return 'bg-slate-100 text-slate-600 border border-slate-200';
+        return status
+          ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+          : 'bg-rose-50 text-rose-600 border border-rose-200';
       };
 
       const showDetail = (item) => {

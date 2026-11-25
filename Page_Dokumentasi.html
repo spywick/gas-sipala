@@ -355,7 +355,7 @@
             let thnDiff = (Number(b.tahun) - Number(a.tahun)) * -modifier;
             if (thnDiff !== 0) return thnDiff;
 
-            let blnDiff = (daftarBulanMap[b.bulan] - daftarBulanMap[a.bulan]) * -modifier;
+            let blnDiff = ((daftarBulanMap[b.bulan] || 0) - (daftarBulanMap[a.bulan] || 0)) * -modifier;
             if (blnDiff !== 0) return blnDiff;
 
             return (Number(b.tanggal) - Number(a.tanggal)) * -modifier;
@@ -377,6 +377,12 @@
 
       const totalPages = computed(() => {
         return Math.ceil(filteredData.value.length / itemsPerPage.value) || 1;
+      });
+
+
+      // Jika jumlah halaman menyusut (hapus/sinkron/filter), jangan biarkan halaman aktif melewati batas
+      watch(totalPages, (n) => {
+        if (currentPage.value > n) currentPage.value = n;
       });
 
       const startIndex = computed(() => {
@@ -403,7 +409,8 @@
 
       const openModal = (item = null) => {
         if (item) {
-          form.value = { ...item };
+          // _orig = penanda baris saat dimuat, dipakai server untuk mendeteksi data yang sudah berubah
+          form.value = { ...item, _orig: { deskripsi: item.deskripsi, link_dokumentasi: item.link_dokumentasi } };
         } else {
           form.value = {
             rowIndex: '',
@@ -440,7 +447,7 @@
             saving.value = false;
             showToast("Terjadi kesalahan: " + err.message, 'error');
           })
-          .saveDokumentasi(form.value);
+          .saveDokumentasi(JSON.parse(JSON.stringify(form.value)));
       };
 
       const confirmDelete = (item) => {
@@ -469,7 +476,10 @@
             isDeleteModalOpen.value = false;
             showToast("Gagal menghapus: " + err.message, 'error');
           })
-          .deleteDokumentasi(itemToDelete.value.rowIndex);
+          .deleteDokumentasi(itemToDelete.value.rowIndex, {
+            deskripsi: itemToDelete.value.deskripsi,
+            link_dokumentasi: itemToDelete.value.link_dokumentasi
+          });
       };
 
       const visiblePages = computed(() => {

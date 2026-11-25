@@ -56,7 +56,7 @@
                   <div class="text-2xl">{{ getMoodEmoji(moodData.dominantMood) }}</div>
                   <div>
                     <p class="text-[10px] uppercase font-bold tracking-wider text-blue-100">Moodbooster Utama</p>
-                    <p class="text-sm font-extrabold capitalize">{{ moodData.dominantMood }} ({{ moodData.percentages[moodData.dominantMood] || 0 }}%)</p>
+                    <p class="text-sm font-extrabold capitalize">{{ moodData.totalVotes > 0 ? moodData.dominantMood + ' (' + (moodData.percentages[moodData.dominantMood] || 0) + '%)' : 'Belum ada suara' }}</p>
                   </div>
                 </div>
 
@@ -240,7 +240,7 @@
       </div>
     `,
     setup() {
-      const { ref, computed, onMounted } = Vue;
+      const { ref, computed, onActivated } = Vue;
       const info = ref('Sistem Informasi Pengelolaan Administrasi Lengkap Abdya.');
       const isModalOpen = ref(false);
 
@@ -261,7 +261,7 @@
         totalVotes: 0,
         counts: { semangat: 0, senang: 0, biasa: 0, sedih: 0, gakmood: 0 },
         percentages: { semangat: 0, senang: 0, biasa: 0, sedih: 0, gakmood: 0 },
-        dominantMood: 'semangat',
+        dominantMood: '',
         recentQuotes: []
       });
 
@@ -331,7 +331,8 @@
         isModalOpen.value = false;
       };
 
-      onMounted(() => {
+      // Halaman di-cache <keep-alive>: onActivated jalan saat pertama dibuka DAN setiap kembali ke Beranda
+      onActivated(() => {
         fetchMoodData();
       });
 

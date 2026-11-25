@@ -14,7 +14,7 @@ Dashboard SIPALA adalah aplikasi internal berbasis web yang dirancang khusus unt
 - **Kartu Sambutan & Informasi Versi Sistem:** Pengumuman pembaruan sistem yang dilengkapi tautan langsung ke portal SIPALA versi terdahulu.
 - **Modal Popup "Tentang Aplikasi":** Menyajikan informasi latar belakang pembuatan aplikasi, teknologi yang digunakan, dan kontak pengembang utama.
 - ** Tracker Suasana Hati Pegawai (Daily Mood Tracker):**
-  - Input ekspresi perasaan pegawai secara anonim dengan 5 pilihan mood (*Semangat, Senang, Biasa Aja, Sedih, Marah*).
+  - Input ekspresi perasaan pegawai secara anonim dengan 5 pilihan mood (*Semangat, Senang, Biasa Aja, Sedih, Gak Mood*).
   - Validasi pesan anonim/curhat minimum 3 kata secara *real-time*.
   - Kalkulasi persentase dan statistik mood harian yang terhubung langsung dengan database.
   - *Pojok Curhat & Pesan Tim* dengan batas scroll vertikal yang rapi.
@@ -49,7 +49,13 @@ Proyek dikembangkan secara modular agar setiap halaman dan komponen mudah dipeli
 
 ```text
 GAS-SIPALA/
-├── Code.gs                          # Backend utama (doGet, include, getData, Mood Service, dll.)
+├── Code.gs                          # Backend utama (doGet, include)
+├── Utils.gs                         # Helper bersama (getDb_, lock, validasi, normalisasi tipe data)
+├── MoodService.gs                   # Backend Mood Tracker (sheet LOG_MOOD)
+├── AnggaranService.gs               # Sinkronisasi & parsing SPBY
+├── DokumentasiService.gs            # CRUD Dokumentasi
+├── LinkAplikasiService.gs           # CRUD Arsip Link Aplikasi
+├── DEVLOG.md                        # Catatan progres & backlog (baca ini dulu saat melanjutkan)
 ├── Index.html                       # Frontend utama (Struktur layout, Vue 3 mount, & Tailwind)
 ├── Sidebar.html                     # Komponen menu navigasi samping (dengan dropdown submenu)
 ├── Page_Beranda.html                # Halaman Beranda (Sambutan, Mood Tracker, Modal Info)

@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Vue.js 3 CDN -->
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
 </head>
 <body class="bg-gray-100 font-sans">
 
@@ -112,18 +112,20 @@
         });
 
         // Fungsi jam & tanggal real-time
+        // Zona waktu dikunci ke WIB agar tidak mengikuti zona perangkat (label "WIB" selalu benar)
+        const clockFormatter = new Intl.DateTimeFormat('id-ID', {
+          timeZone: 'Asia/Jakarta',
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
         const updateClock = () => {
-          const now = new Date();
-          const options = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-          };
-          currentTime.value = now.toLocaleDateString('id-ID', options) + ' WIB';
+          currentTime.value = clockFormatter.format(new Date()) + ' WIB';
         };
 
         onMounted(() => {

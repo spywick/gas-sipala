@@ -344,6 +344,12 @@
         return Math.ceil(filteredData.value.length / itemsPerPage.value) || 1;
       });
 
+
+      // Jika jumlah halaman menyusut (hapus/sinkron/filter), jangan biarkan halaman aktif melewati batas
+      watch(totalPages, (n) => {
+        if (currentPage.value > n) currentPage.value = n;
+      });
+
       const startIndex = computed(() => {
         return (currentPage.value - 1) * itemsPerPage.value;
       });
@@ -368,7 +374,7 @@
 
       const openModal = (item = null) => {
         if (item) {
-          form.value = { ...item };
+          form.value = { ...item, _orig: { nama: item.nama, link: item.link } };
         } else {
           form.value = { 
             rowIndex: '', 
@@ -405,7 +411,7 @@
             saving.value = false;
             showToast("Terjadi kesalahan: " + err.message, 'error');
           })
-          .saveLinkAplikasi(form.value);
+          .saveLinkAplikasi(JSON.parse(JSON.stringify(form.value)));
       };
 
       const confirmDelete = (item) => {
@@ -434,7 +440,10 @@
             isDeleteModalOpen.value = false;
             showToast("Gagal menghapus: " + err.message, 'error');
           })
-          .deleteLinkAplikasi(itemToDelete.value.rowIndex);
+          .deleteLinkAplikasi(itemToDelete.value.rowIndex, {
+            nama: itemToDelete.value.nama,
+            link: itemToDelete.value.link
+          });
       };
 
       const visiblePages = computed(() => {
