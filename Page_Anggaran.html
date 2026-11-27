@@ -481,12 +481,12 @@
                       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
                         <div class="bg-white border border-slate-200/70 px-3 py-2 rounded-xl">
                           <span class="text-[10px] text-slate-400 block">Checklist RUP</span>
-                          <strong class="text-slate-800 break-words">{{ selectedItem.checklist_rup || '-' }}</strong>
+                          <strong class="text-slate-800 break-words">{{ selectedItem.checkListRup || '-' }}</strong>
                         </div>
                         <div class="bg-white border border-slate-200/70 px-3 py-2 rounded-xl">
                           <span class="text-[10px] text-slate-400 block">Link Dokumen RUP</span>
-                          <a v-if="selectedItem.link_dok_rup && selectedItem.link_dok_rup !== '-'"
-                             :href="selectedItem.link_dok_rup"
+                          <a v-if="selectedItem.linkDokRup && selectedItem.linkDokRup !== '-'"
+                             :href="selectedItem.linkDokRup"
                              target="_blank"
                              rel="noopener noreferrer"
                              class="text-blue-600 hover:text-blue-800 font-semibold underline break-all inline-flex items-center gap-1 mt-0.5">
@@ -797,23 +797,30 @@
 
       const filteredData = computed(() => {
         const query = searchQuery.value.toLowerCase();
-        return rawData.value.filter(item => {
-          const { month, year } = extractMonthYear(item);
-          const matchSearch = String(item.noSpby).toLowerCase().includes(query) || 
-                              String(item.noSpp).toLowerCase().includes(query) ||
-                              String(item.pengusul).toLowerCase().includes(query) ||
-                              String(item.pembayaran).toLowerCase().includes(query) ||
-                              String(item.akun).toLowerCase().includes(query) ||
-                              String(item.program).toLowerCase().includes(query);
-          const matchMonth = selectedMonth.value === 'ALL' || month === selectedMonth.value;
-          const matchYear = selectedYear.value === 'ALL' || year === selectedYear.value;
-          const matchSheet = selectedSheet.value === 'ALL' || item.sheetAsal === selectedSheet.value;
-          const matchStatus = selectedStatus.value === 'ALL' || String(item.sudahBayar) === String(selectedStatus.value);
-          return matchSearch && matchMonth && matchYear && matchSheet && matchStatus;
-        });
+        return rawData.value
+          .filter(item => {
+            const { month, year } = extractMonthYear(item);
+            const matchSearch = String(item.noSpby).toLowerCase().includes(query) || 
+                                String(item.noSpp).toLowerCase().includes(query) ||
+                                String(item.pengusul).toLowerCase().includes(query) ||
+                                String(item.pembayaran).toLowerCase().includes(query) ||
+                                String(item.akun).toLowerCase().includes(query) ||
+                                String(item.program).toLowerCase().includes(query);
+            const matchMonth = selectedMonth.value === 'ALL' || month === selectedMonth.value;
+            const matchYear = selectedYear.value === 'ALL' || year === selectedYear.value;
+            const matchSheet = selectedSheet.value === 'ALL' || item.sheetAsal === selectedSheet.value;
+            const matchStatus = selectedStatus.value === 'ALL' || String(item.sudahBayar) === String(selectedStatus.value);
+            return matchSearch && matchMonth && matchYear && matchSheet && matchStatus;
+          })
+          .sort((a, b) => {
+            const rowA = Number(a.rowIndex) || 0;
+            const rowB = Number(b.rowIndex) || 0;
+            if (rowB !== rowA) return rowB - rowA;
+            return (Number(b.noUrut) || 0) - (Number(a.noUrut) || 0);
+          });
       });
 
-      watch([searchQuery, selectedMonth, selectedYear, selectedSheet, selectedStatus], () => {
+      watch([searchQuery, selectedMonth, selectedYear, selectedSheet, selectedStatus, itemsPerPage], () => {
         currentPage.value = 1;
       });
 

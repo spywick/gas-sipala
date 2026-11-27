@@ -45,8 +45,11 @@
               </button>
             </div>
 
-            <button @click="fetchData" type="button" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-1 shadow-sm" title="Refresh Data">
-              <span :class="{'animate-spin': loading}">🔄</span>
+            <button @click="fetchData" :disabled="loading" type="button" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-300 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer" title="Refresh Data">
+              <svg :class="['w-4 h-4', {'animate-spin': loading}]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              <span>{{ loading ? 'Memuat...' : 'Refresh' }}</span>
             </button>
             <button @click="openModal()" type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
@@ -135,7 +138,22 @@
               </thead>
               <tbody class="divide-y divide-gray-100 text-sm text-gray-600">
                 <tr v-if="paginatedData.length === 0 && !loading">
-                  <td colspan="5" class="py-12 text-center text-gray-400">Tidak ada data dokumentasi yang ditemukan.</td>
+                  <td colspan="5" class="py-14 px-4 text-center">
+                    <div class="max-w-sm mx-auto flex flex-col items-center justify-center space-y-3">
+                      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                      </div>
+                      <p class="text-sm font-medium text-slate-600">
+                        Tidak ada data yang sesuai dengan pencarian atau filter.
+                      </p>
+                      <button @click="resetFilters" type="button"
+                              class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all shadow-xs active:scale-95 cursor-pointer">
+                        <span>Reset Filter</span>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr v-for="(item, index) in paginatedData" :key="item.rowIndex" class="hover:bg-gray-50 transition">
                   <td class="py-3 px-4 text-center font-medium text-gray-500">{{ startIndex + index + 1 }}</td>
@@ -188,8 +206,21 @@
 
           <!-- MODE 2: TAMPILAN CARD -->
           <div v-else class="p-6">
-            <div v-if="paginatedData.length === 0 && !loading" class="py-12 text-center text-gray-400 text-sm">
-              Tidak ada data dokumentasi yang ditemukan.
+            <div v-if="paginatedData.length === 0 && !loading" class="py-14 px-4 text-center">
+              <div class="max-w-sm mx-auto flex flex-col items-center justify-center space-y-3">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </div>
+                <p class="text-sm font-medium text-slate-600">
+                  Tidak ada data yang sesuai dengan pencarian atau filter.
+                </p>
+                <button @click="resetFilters" type="button"
+                        class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all shadow-xs active:scale-95 cursor-pointer">
+                  <span>Reset Filter</span>
+                </button>
+              </div>
             </div>
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div v-for="(item, index) in paginatedData" :key="item.rowIndex || index"
@@ -368,11 +399,35 @@
           </div>
         </div>
 
-        <!-- Toast Notification -->
-        <div v-if="toast.show" class="fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border transition-all duration-300 max-w-sm"
-             :class="toast.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'">
-          <span class="text-lg">{{ toast.type === 'success' ? '✅' : '❌' }}</span>
-          <div class="text-xs font-medium">{{ toast.message }}</div>
+        <!-- Toast Notification (Hijau Smooth / Merah Smooth) -->
+        <div v-if="toast.show"
+             :class="[
+               'fixed bottom-5 right-5 z-[60] max-w-sm w-full rounded-2xl shadow-xl border p-4 flex items-start gap-3 transition-all duration-300',
+               toast.type === 'success'
+                 ? 'bg-emerald-50/95 border-emerald-200 text-emerald-900'
+                 : 'bg-rose-50/95 border-rose-200 text-rose-900'
+             ]">
+          <div :class="[
+            'w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 text-sm font-bold border',
+            toast.type === 'success'
+              ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+              : 'bg-rose-100 text-rose-700 border-rose-200'
+          ]">
+            {{ toast.type === 'success' ? '✓' : '!' }}
+          </div>
+          <div class="flex-1 text-xs leading-relaxed">
+            <p class="font-bold text-sm tracking-tight">{{ toast.title }}</p>
+            <p :class="toast.type === 'success' ? 'text-emerald-800/85 mt-0.5' : 'text-rose-800/85 mt-0.5'">{{ toast.message }}</p>
+          </div>
+          <button @click="hideToast" type="button" title="Tutup"
+                  :class="[
+                    'text-sm font-bold px-1.5 py-0.5 rounded-lg transition cursor-pointer',
+                    toast.type === 'success'
+                      ? 'text-emerald-600/70 hover:text-emerald-900 hover:bg-emerald-200/60'
+                      : 'text-rose-600/70 hover:text-rose-900 hover:bg-rose-200/60'
+                  ]">
+            ✕
+          </button>
         </div>
 
       </div>
@@ -410,13 +465,30 @@
 
       const toast = ref({
         show: false,
+        title: '',
         message: '',
         type: 'success'
       });
+      let toastTimer = null;
 
-      const showToast = (message, type = 'success') => {
-        toast.value = { show: true, message, type };
-        setTimeout(() => {
+      const hideToast = () => {
+        toast.value.show = false;
+        if (toastTimer) {
+          clearTimeout(toastTimer);
+          toastTimer = null;
+        }
+      };
+
+      const showToast = (message, type = 'success', title = null) => {
+        if (toastTimer) clearTimeout(toastTimer);
+        const defaultTitle = type === 'success' ? 'Berhasil' : 'Terjadi Kesalahan';
+        toast.value = {
+          show: true,
+          title: title || defaultTitle,
+          message,
+          type
+        };
+        toastTimer = setTimeout(() => {
           toast.value.show = false;
         }, 3500);
       };
@@ -438,16 +510,17 @@
         loading.value = true;
         google.script.run
           .withSuccessHandler(res => {
-            if (res.status) {
-              tableData.value = res.data;
-            } else {
-              showToast(res.message, 'error');
-            }
             loading.value = false;
+            if (res && res.status) {
+              tableData.value = res.data || [];
+              showToast(`Berhasil memuat ${tableData.value.length} data dokumentasi dari sheet.`, 'success', 'Data Berhasil Dimuat');
+            } else {
+              showToast((res && res.message) || 'Gagal memuat data dari sheet.', 'error', 'Gagal Memuat Data');
+            }
           })
           .withFailureHandler(err => {
-            showToast("Gagal memuat data: " + err.message, 'error');
             loading.value = false;
+            showToast("Gagal memuat data: " + (err && err.message ? err.message : 'Koneksi gagal'), 'error', 'Gagal Memuat Data');
           })
           .getDokumentasiData();
       };
@@ -677,6 +750,13 @@
         return pages;
       });
 
+      const resetFilters = () => {
+        searchQuery.value = '';
+        selectedBulan.value = '';
+        selectedTahun.value = '';
+        currentPage.value = 1;
+      };
+
       return {
         tableData,
         loading,
@@ -711,7 +791,10 @@
         fetchData,
         filteredData,
         visiblePages,
-        toast
+        toast,
+        hideToast,
+        showToast,
+        resetFilters
       };
     }
   };
