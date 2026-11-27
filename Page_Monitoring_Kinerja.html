@@ -1,11 +1,66 @@
 <script>
   const PageMonitoringKinerja = {
     template: `
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 class="text-2xl font-bold text-gray-800 mb-2">Monitoring Kinerja</h3>
-        <p class="text-gray-600 mb-4">Evaluasi indikator kinerja dan capaian target di sini.</p>
+      <!-- Wadah utama dengan jarak antar elemen (space-y-6) -->
+      <div class="space-y-6">
+
+        <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm flex items-start space-x-3">
+          <div class="w-8 h-8 bg-gray-100 text-gray-700 rounded-lg flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-6 9l2 2 4-4"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900">Monitoring Kinerja</h3>
+            <p class="text-xs text-gray-600 mt-0.5">
+              Pantau matriks kinerja tahun 2026.
+            </p>
+          </div>
+        </div>
+
+        <!-- Container Konten Utama -->
+        <div class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
+          
+          <!-- Card Info / Tautan Versi Lama -->
+          <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                ℹ️
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold text-blue-900">Informasi Matriks Kinerja</h4>
+                <p class="text-xs text-blue-700 mt-0.5">
+                  Laporan kegiatan mingguan ini bersumber langsung dari Apps Scripts Eksternal secara <em>real-time</em>.
+                </p>
+              </div>
+            </div>
+            <a :href="urlAppsScript" target="_blank" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 whitespace-nowrap shadow-sm">
+              <span>Buka Apps Scripts</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+          </div>
+
+          <!-- Wrapper Iframe -->
+          <div class="relative w-full h-[700px] overflow-hidden rounded-lg border border-gray-200">
+            <iframe 
+              :src="urlAppsScript" 
+              class="absolute top-0 left-0 w-full h-full border-0" 
+              allowfullscreen 
+              sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+            </iframe>
+          </div>
+          
+        </div>
       </div>
     `,
-    setup() { return {}; }
+    setup() { 
+      
+      const { ref } = Vue;
+      
+      const urlAppsScript = ref('https://script.google.com/macros/s/AKfycbyuzI0-150-TSV1UlYmfOrE532BRuW5yf6oK0fF_tf_a0SW0d160HglUs4Sb8f3ucMO/exec');
+
+      return {
+        urlAppsScript
+      }; 
+      
+    }
   };
 </script>

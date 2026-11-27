@@ -5,21 +5,47 @@
         <!-- Header & Tombol Tambah -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
 
-        <div>
-          <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <span class="text-gray-600 flex items-center">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-            </span>
-            Arsip Link/Aplikasi
-          </h1>
-          <p class="text-gray-600 text-sm">Kelola daftar arsip dokumentasi, tautan, dan laporan kegiatan.</p>
-        </div>
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <span class="text-gray-600 flex items-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+              </span>
+              Arsip Link/Aplikasi
+            </h1>
+            <p class="text-gray-600 text-sm">Kelola daftar tautan, tahun, dan deskripsi aplikasi terintegrasi.</p>
+          </div>
           
           <div class="flex items-center space-x-2">
-            <button @click="fetchData" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-1 shadow-sm" title="Refresh Data">
+            <!-- Toggle Swap Tampilan Table / Card -->
+            <div class="inline-flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
+              <button @click="viewMode = 'table'"
+                      type="button"
+                      title="Tampilan Tabel"
+                      aria-label="Tampilan Tabel"
+                      :class="viewMode === 'table' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
+                      class="p-1.5 rounded-md transition flex items-center gap-1 text-xs font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 3v18M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"></path>
+                </svg>
+                <span class="hidden sm:inline">Tabel</span>
+              </button>
+              <button @click="viewMode = 'card'"
+                      type="button"
+                      title="Tampilan Card"
+                      aria-label="Tampilan Card"
+                      :class="viewMode === 'card' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
+                      class="p-1.5 rounded-md transition flex items-center gap-1 text-xs font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                </svg>
+                <span class="hidden sm:inline">Card</span>
+              </button>
+            </div>
+
+            <button @click="fetchData" type="button" class="bg-white hover:bg-blue-50 text-blue-600 border border-blue-300 px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-1 shadow-sm" title="Refresh Data">
               <span :class="{'animate-spin': loading}">🔄</span>
             </button>
-            <button @click="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+            <button @click="openModal()" type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
               <span>Tambah Link Baru</span>
             </button>
@@ -40,10 +66,10 @@
           </div>
         </div>
 
-        <!-- Kartu Utama Tabel (Berisi Control Top, Tabel, & Pagination di dalam border) -->
+        <!-- Kartu Utama (Berisi Control Top, Tabel / Card Grid, & Pagination di dalam border) -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
           
-          <!-- Overlay Animasi Loading di atas Tabel -->
+          <!-- Overlay Animasi Loading -->
           <div v-if="loading" class="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center space-y-3 transition-all duration-300">
             <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             <p class="text-xs font-semibold text-blue-600 animate-pulse">Memuat data terbaru dari Google Sheets...</p>
@@ -67,40 +93,40 @@
             </div>
           </div>
 
-          <!-- Tabel Data -->
-          <div class="overflow-x-auto">
+          <!-- MODE 1: TAMPILAN GRID TABLE -->
+          <div v-if="viewMode === 'table'" class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider border-b border-gray-200">
                   <th class="py-3 px-6 font-semibold w-12 text-center">No</th>
-                  <th class="py-3 px-4 font-semibold cursor-pointer" @click="sortBy('tahun')">
+                  <th class="py-3 px-4 font-semibold cursor-pointer select-none" @click="sortBy('tahun')">
                     Tahun <span>{{ sortField === 'tahun' ? (sortAsc ? '▲' : '▼') : '' }}</span>
                   </th>
-                  <th class="py-3 px-4 font-semibold cursor-pointer" @click="sortBy('nama')">
+                  <th class="py-3 px-4 font-semibold cursor-pointer select-none" @click="sortBy('nama')">
                     Nama <span>{{ sortField === 'nama' ? (sortAsc ? '▲' : '▼') : '' }}</span>
                   </th>
                   <th class="py-3 px-4 font-semibold">Link</th>
-                  <th class="py-3 px-4 font-semibold cursor-pointer" @click="sortBy('kategori')">
+                  <th class="py-3 px-4 font-semibold cursor-pointer select-none" @click="sortBy('kategori')">
                     Kategori <span>{{ sortField === 'kategori' ? (sortAsc ? '▲' : '▼') : '' }}</span>
                   </th>
                   <th class="py-3 px-4 font-semibold text-center">VPN</th>
                   <th class="py-3 px-4 font-semibold">Deskripsi</th>
                   <th class="py-3 px-4 font-semibold">Keterangan</th>
-                  <th class="py-3 px-6 font-semibold text-center">Aksi</th>
+                  <th class="py-3 px-6 font-semibold text-center w-28">Aksi</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 text-sm text-gray-600">
                 <tr v-if="paginatedData.length === 0 && !loading">
                   <td colspan="9" class="py-12 text-center text-gray-400">Tidak ada data yang ditemukan.</td>
                 </tr>
-                <tr v-for="(item, index) in paginatedData" :key="item.rowIndex" class="hover:bg-gray-50 transition">
+                <tr v-for="(item, index) in paginatedData" :key="item.rowIndex" class="hover:bg-gray-50/80 transition-colors">
                   <td class="py-3 px-6 text-center font-medium text-gray-500">{{ startIndex + index + 1 }}</td>
                   <td class="py-3 px-4 font-medium text-gray-800">
                     <span class="bg-gray-100 px-2.5 py-1 rounded text-xs font-semibold">{{ item.tahun }}</span>
                   </td>
                   <td class="py-3 px-4 font-semibold text-gray-800">{{ item.nama }}</td>
                   <td class="py-3 px-4">
-                    <a :href="item.link" target="_blank" class="text-blue-600 hover:underline truncate max-w-xs block font-medium">
+                    <a :href="item.link" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline truncate max-w-xs block font-medium">
                       {{ item.link }}
                     </a>
                   </td>
@@ -110,7 +136,7 @@
                     </span>
                   </td>
                   <td class="py-3 px-4 text-center">
-                    <span v-if="String(item.vpn).toLowerCase() === 'true'" class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded text-xs font-semibold">
+                    <span v-if="item.vpn" class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded text-xs font-semibold">
                       ✔
                     </span>
                     <span v-else class="bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded text-xs font-semibold">
@@ -119,13 +145,100 @@
                   </td>
                   <td class="py-3 px-4">{{ item.deskripsi }}</td>
                   <td class="py-3 px-4 text-gray-500 italic">{{ item.keterangan || '-' }}</td>
-                  <td class="py-3 px-6 text-center space-x-2 whitespace-nowrap">
-                    <button @click="openModal(item)" class="text-amber-600 hover:text-amber-800 font-medium text-xs bg-amber-50 px-2.5 py-1 rounded transition">Edit</button>
-                    <button @click="confirmDelete(item)" class="text-red-600 hover:text-red-800 font-medium text-xs bg-red-50 px-2.5 py-1 rounded transition">Hapus</button>
+                  <td class="py-3 px-6 text-center whitespace-nowrap">
+                    <div class="inline-flex items-center justify-center gap-1.5">
+                      <button @click="openModal(item)"
+                              type="button"
+                              title="Edit Link/Aplikasi"
+                              aria-label="Edit Link/Aplikasi"
+                              class="p-2 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/70 rounded-lg transition-all duration-150 hover:scale-105 active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                      </button>
+                      <button @click="confirmDelete(item)"
+                              type="button"
+                              title="Hapus Link/Aplikasi"
+                              aria-label="Hapus Link/Aplikasi"
+                              class="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/70 rounded-lg transition-all duration-150 hover:scale-105 active:scale-95">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- MODE 2: TAMPILAN CARD -->
+          <div v-else class="p-6">
+            <div v-if="paginatedData.length === 0 && !loading" class="py-12 text-center text-gray-400 text-sm">
+              Tidak ada data yang ditemukan.
+            </div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div v-for="(item, index) in paginatedData" :key="item.rowIndex"
+                   class="bg-white border border-gray-200/90 hover:border-blue-300 rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-4">
+                <div class="space-y-3">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center flex-wrap gap-1.5">
+                      <span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs font-semibold">
+                        #{{ startIndex + index + 1 }} • {{ item.tahun }}
+                      </span>
+                      <span :class="item.kategori === 'Aplikasi' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'"
+                            class="border px-2.5 py-0.5 rounded-full text-xs font-medium">
+                        {{ item.kategori || 'Link' }}
+                      </span>
+                    </div>
+                    <span v-if="item.vpn" class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-semibold shrink-0">
+                      ✔ VPN
+                    </span>
+                    <span v-else class="bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-semibold shrink-0">
+                      ✘ Non-VPN
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 class="font-bold text-gray-900 text-base leading-snug">{{ item.nama }}</h3>
+                    <p class="text-xs text-gray-600 mt-1.5 line-clamp-3 leading-relaxed">{{ item.deskripsi }}</p>
+                  </div>
+
+                  
+                </div>
+
+                <div class="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                  <a :href="item.link" target="_blank" rel="noopener noreferrer"
+                     class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 truncate">
+                    <span class="truncate">{{ item.link }}</span>
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                  </a>
+
+                  <div class="inline-flex items-center gap-1.5 shrink-0">
+                    <button @click="openModal(item)"
+                            type="button"
+                            title="Edit Link/Aplikasi"
+                            aria-label="Edit Link/Aplikasi"
+                            class="p-2 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/70 rounded-lg transition-all duration-150 hover:scale-105 active:scale-95">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </button>
+                    <button @click="confirmDelete(item)"
+                            type="button"
+                            title="Hapus Link/Aplikasi"
+                            aria-label="Hapus Link/Aplikasi"
+                            class="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/70 rounded-lg transition-all duration-150 hover:scale-105 active:scale-95">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Pagination Bar Bawah di dalam Card -->
@@ -161,12 +274,16 @@
 
         </div>
 
-        <!-- Modal Form Tambah / Edit -->
-        <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div class="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+        <!-- Modal Form Tambah / Edit dengan Animasi Buka & Tutup Smooth -->
+        <div v-if="isModalOpen"
+             @click.self="closeModal"
+             :class="modalVisible ? 'opacity-100 duration-300 ease-out' : 'opacity-0 duration-200 ease-in pointer-events-none'"
+             class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4 transition-opacity will-change-opacity">
+          <div :class="modalVisible ? 'opacity-100 scale-100 translate-y-0 duration-300 ease-out' : 'opacity-0 scale-95 translate-y-3 duration-200 ease-in'"
+               class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transition-all will-change-transform">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/70">
               <h3 class="font-bold text-gray-800">{{ form.rowIndex ? 'Edit Link Aplikasi' : 'Tambah Link Aplikasi Baru' }}</h3>
-              <button @click="closeModal" class="text-gray-400 hover:text-gray-600">✕</button>
+              <button @click="closeModal" type="button" class="text-gray-400 hover:text-gray-600 rounded-lg p-1 hover:bg-gray-100 transition">✕</button>
             </div>
             <form @submit.prevent="saveData" class="p-6 space-y-4">
               <div>
@@ -179,7 +296,7 @@
               </div>
               <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Link URL <span class="text-red-500">*</span></label>
-                <input type="url" v-model="form.link" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="url" v-model="form.link" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://...">
               </div>
               
               <!-- Pilihan Kategori dan VPN -->
@@ -210,7 +327,7 @@
               </div>
               <div class="flex justify-end space-x-2 pt-2">
                 <button type="button" @click="closeModal" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition">Batal</button>
-                <button type="submit" :disabled="saving" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 shadow-sm">
                   {{ saving ? 'Menyimpan...' : 'Simpan' }}
                 </button>
               </div>
@@ -218,9 +335,13 @@
           </div>
         </div>
 
-        <!-- Modal Konfirmasi Hapus Kustom -->
-        <div v-if="isDeleteModalOpen" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div class="bg-white rounded-xl shadow-lg w-full max-w-sm overflow-hidden p-6 text-center space-y-4">
+        <!-- Modal Konfirmasi Hapus Kustom dengan Animasi Buka & Tutup Smooth -->
+        <div v-if="isDeleteModalOpen"
+             @click.self="closeDeleteModal"
+             :class="deleteModalVisible ? 'opacity-100 duration-300 ease-out' : 'opacity-0 duration-200 ease-in pointer-events-none'"
+             class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4 transition-opacity will-change-opacity">
+          <div :class="deleteModalVisible ? 'opacity-100 scale-100 translate-y-0 duration-300 ease-out' : 'opacity-0 scale-95 translate-y-3 duration-200 ease-in'"
+               class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center space-y-4 transition-all will-change-transform">
             <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
               ⚠️
             </div>
@@ -229,8 +350,8 @@
               <p class="text-xs text-gray-500 mt-1">Apakah Anda yakin ingin menghapus arsip link/aplikasi ini? Tindakan ini tidak dapat dibatalkan.</p>
             </div>
             <div class="flex justify-center space-x-2 pt-2">
-              <button @click="isDeleteModalOpen = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition w-full">Batal</button>
-              <button @click="executeDelete" :disabled="deleting" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition w-full disabled:opacity-50">
+              <button @click="closeDeleteModal" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition w-full">Batal</button>
+              <button @click="executeDelete" type="button" :disabled="deleting" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition w-full disabled:opacity-50 shadow-sm">
                 {{ deleting ? 'Menghapus...' : 'Ya, Hapus' }}
               </button>
             </div>
@@ -247,12 +368,13 @@
       </div>
     `,
     setup() {
-      const { ref, computed, onMounted, watch } = Vue;
+      const { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } = Vue;
       
       const tableData = ref([]);
       const loading = ref(true);
       const saving = ref(false);
       const deleting = ref(false);
+      const viewMode = ref('table'); // 'table' | 'card'
       
       const searchQuery = ref('');
       const selectedTahun = ref('');
@@ -263,8 +385,12 @@
       const itemsPerPage = ref(10);
       
       const isModalOpen = ref(false);
+      const modalVisible = ref(false);
       const isDeleteModalOpen = ref(false);
+      const deleteModalVisible = ref(false);
       const itemToDelete = ref(null);
+      let modalCloseTimer = null;
+      let deleteModalCloseTimer = null;
 
       const toast = ref({
         show: false,
@@ -344,8 +470,6 @@
         return Math.ceil(filteredData.value.length / itemsPerPage.value) || 1;
       });
 
-
-      // Jika jumlah halaman menyusut (hapus/sinkron/filter), jangan biarkan halaman aktif melewati batas
       watch(totalPages, (n) => {
         if (currentPage.value > n) currentPage.value = n;
       });
@@ -372,9 +496,36 @@
         }
       };
 
+      const triggerSmoothOpen = (openRef, visibleRef, setTimer) => {
+        const prevTimer = setTimer(null);
+        if (prevTimer) clearTimeout(prevTimer);
+        openRef.value = true;
+        visibleRef.value = false;
+        nextTick(() => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              visibleRef.value = true;
+            });
+          });
+        });
+      };
+
+      const triggerSmoothClose = (openRef, visibleRef, setTimer, onClosed) => {
+        visibleRef.value = false;
+        const timer = setTimeout(() => {
+          openRef.value = false;
+          if (onClosed) onClosed();
+        }, 200);
+        setTimer(timer);
+      };
+
       const openModal = (item = null) => {
         if (item) {
-          form.value = { ...item, _orig: { nama: item.nama, link: item.link } };
+          form.value = {
+            ...item,
+            vpn: Boolean(item.vpn),
+            _orig: { nama: item.nama, link: item.link }
+          };
         } else {
           form.value = { 
             rowIndex: '', 
@@ -387,11 +538,19 @@
             keterangan: '' 
           };
         }
-        isModalOpen.value = true;
+        triggerSmoothOpen(isModalOpen, modalVisible, (t) => {
+          const old = modalCloseTimer;
+          modalCloseTimer = t;
+          return old;
+        });
       };
 
       const closeModal = () => {
-        isModalOpen.value = false;
+        triggerSmoothClose(isModalOpen, modalVisible, (t) => {
+          const old = modalCloseTimer;
+          modalCloseTimer = t;
+          return old;
+        });
       };
 
       const saveData = () => {
@@ -416,7 +575,21 @@
 
       const confirmDelete = (item) => {
         itemToDelete.value = item;
-        isDeleteModalOpen.value = true;
+        triggerSmoothOpen(isDeleteModalOpen, deleteModalVisible, (t) => {
+          const old = deleteModalCloseTimer;
+          deleteModalCloseTimer = t;
+          return old;
+        });
+      };
+
+      const closeDeleteModal = () => {
+        triggerSmoothClose(isDeleteModalOpen, deleteModalVisible, (t) => {
+          const old = deleteModalCloseTimer;
+          deleteModalCloseTimer = t;
+          return old;
+        }, () => {
+          if (!deleting.value) itemToDelete.value = null;
+        });
       };
 
       const executeDelete = () => {
@@ -426,7 +599,7 @@
         google.script.run
           .withSuccessHandler(res => {
             deleting.value = false;
-            isDeleteModalOpen.value = false;
+            closeDeleteModal();
             itemToDelete.value = null;
             if (res.status) {
               showToast(res.message, 'success');
@@ -437,7 +610,7 @@
           })
           .withFailureHandler(err => {
             deleting.value = false;
-            isDeleteModalOpen.value = false;
+            closeDeleteModal();
             showToast("Gagal menghapus: " + err.message, 'error');
           })
           .deleteLinkAplikasi(itemToDelete.value.rowIndex, {
@@ -445,6 +618,23 @@
             link: itemToDelete.value.link
           });
       };
+
+      const handleKeydown = (e) => {
+        if (e.key === 'Escape') {
+          if (deleteModalVisible.value) closeDeleteModal();
+          else if (modalVisible.value) closeModal();
+        }
+      };
+
+      onMounted(() => {
+        window.addEventListener('keydown', handleKeydown);
+      });
+
+      onBeforeUnmount(() => {
+        window.removeEventListener('keydown', handleKeydown);
+        if (modalCloseTimer) clearTimeout(modalCloseTimer);
+        if (deleteModalCloseTimer) clearTimeout(deleteModalCloseTimer);
+      });
 
       const visiblePages = computed(() => {
         let pages = [];
@@ -470,6 +660,7 @@
         loading,
         saving,
         deleting,
+        viewMode,
         searchQuery,
         selectedTahun,
         uniqueTahun,
@@ -483,12 +674,15 @@
         paginatedData,
         sortBy,
         isModalOpen,
+        modalVisible,
         isDeleteModalOpen,
+        deleteModalVisible,
         form,
         openModal,
         closeModal,
         saveData,
         confirmDelete,
+        closeDeleteModal,
         executeDelete,
         fetchData,
         filteredData,
